@@ -1,5 +1,11 @@
 #!/usr/bin/env python2/python3
 # -*- coding: utf-8 -*-
+
+'''
+2018年8月13日,梁子.
+我学习了Re-ranking Preson Re-id with k-reciprocal Encoding这篇论文,之后开始注释这个文件.
+'''
+
 """
 Created on Mon Jun 26 14:46:56 2017
 @author: luohao
@@ -31,6 +37,7 @@ Returns:
 
 import numpy as np
 
+#
 def k_reciprocal_neigh( initial_rank, i, k1):
     forward_k_neigh_index = initial_rank[i,:k1+1]
     backward_k_neigh_index = initial_rank[forward_k_neigh_index,:k1+1]
@@ -39,14 +46,17 @@ def k_reciprocal_neigh( initial_rank, i, k1):
 
 def re_ranking(q_g_dist, q_q_dist, g_g_dist, k1=20, k2=6, lambda_value=0.3):
     # The following naming, e.g. gallery_num, is different from outer scope.
-    # Don't care about it.
+    # Don't care about it.         #也许我没有理解这两行注释的意思
     original_dist = np.concatenate(
       [np.concatenate([q_q_dist, q_g_dist], axis=1),
        np.concatenate([q_g_dist.T, g_g_dist], axis=1)],
-      axis=0)
+      axis=0) #也就是相当于组成了一个对角矩阵(方阵),这里的concatenate主要用来做矩阵的拼接
     original_dist = 2. - 2 * original_dist   #np.power(original_dist, 2).astype(np.float32)
+
     original_dist = np.transpose(1. * original_dist/np.max(original_dist,axis = 0))
+
     V = np.zeros_like(original_dist).astype(np.float32)
+
     #initial_rank = np.argsort(original_dist).astype(np.int32)
     # top K1+1
     initial_rank = np.argpartition( original_dist, range(1,k1+1) )

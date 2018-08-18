@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import time
 import os
-from model import ft_net, ft_net_dense, PCB
+from model import ft_net, ft_net_dense, PCB,fusion_net
 from random_erasing import RandomErasing
 import json
 
@@ -38,6 +38,11 @@ parser.add_argument('--erasing_p', default=0, type=float, help='Random Erasing p
 parser.add_argument('--use_dense', action='store_true', help='use densenet121' )
 #是否使用PCB
 parser.add_argument('--PCB', action='store_true', help='use PCB+ResNet50' )
+#是否使用fusion_net
+parser.add_argument('--FNN',action='store_true',help='use FusionNeuralNetwork')
+
+
+
 opt = parser.parse_args()
 
 data_dir = opt.data_dir
@@ -221,7 +226,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                     optimizer.step()    #优化器优化
 
                 # statistics
-                running_loss += loss.data[0]  #将所有的loss加和
+                running_loss += loss.data.item()  #将所有的loss加和
                 running_corrects += torch.sum(preds == labels.data) #将所有预测正确的次数加和
 
             epoch_loss = running_loss / dataset_sizes[phase]     #输出损失？？？？
@@ -294,6 +299,8 @@ if opt.use_dense:
     model = ft_net_dense(len(class_names))
 else:
     model = ft_net(len(class_names))
+if opt.FNN:
+    model=fusion_net(len(class_names))
 
 if opt.PCB:
     model = PCB(len(class_names))

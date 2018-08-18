@@ -3,6 +3,10 @@ import torch.nn as nn
 from torch.nn import init
 from torchvision import models
 from torch.autograd import Variable
+import numpy as np
+import PCA
+import LOMO
+
 
 ######################################################################
 def weights_init_kaiming(m):
@@ -194,6 +198,62 @@ class PCB_test(nn.Module):
         x = self.avgpool(x)
         y = x.view(x.size(0),x.size(1),x.size(2))
         return y
+
+
+class fusion_net(nn.Module):
+
+    def __init__(self, class_num ):
+        super(fusion_net, self).__init__()
+        model_ft = models.resnet50(pretrained=True)
+        # avg pooling to global pooling
+        model_ft.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.model = model_ft
+        #2048+4096=6144
+        self.classifier = ClassBlock(4096, class_num)
+        self.buffer1=nn.Linear(4096,4096,bias=1)
+
+
+
+    def forward(self, x):
+
+        #传统特征
+        hand_feature = PCA.sp_PCA(LOMO.LOMO(x),dAfter=2048)
+        #深度特征
+        x = self.model.conv1(x)
+        x = self.model.bn1(x)
+        x = self.model.relu(x)
+        x = self.model.maxpool(x)
+        x = self.model.layer1(x)
+        x = self.model.layer2(x)
+        x = self.model.layer3(x)
+        x = self.model.layer4(x)
+        x = self.model.avgpool(x)
+        x = torch.squeeze(x)
+        #融合
+        x=[x,hand_feature]
+        x=torch.squeeze(x)
+
+        x = self.classifier(x)
+        return x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # debug model structure
 #net = ft_net(751)
