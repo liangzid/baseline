@@ -71,8 +71,8 @@ def inverse_nomalize(img,mean,variance):
         for j in range(x):
             for k in range(y):
                 img[j,k,i]=abs(img[j,k,i])
-        #print('*'*20)
-        #print(img)
+        print('*'*20)
+        print(img)
     return img
 
 '''
@@ -81,12 +81,12 @@ it has:
 SSR, MSR, MSRCR, MSRCP, and so on.
 '''
 def Retinex_SingleScale(img,c):
-    #print(img)
+    print(img)
     wait=np.abs(cv2.GaussianBlur(img,(5,5),c))
-    #print('000'*30)
-    #print(wait)
+    print('000'*30)
+    print(wait)
     retinex=np.log10(img)-np.log10(wait)
-    #print(retinex)
+    print(retinex)
     return retinex
 
 def Retinex_MultiScale(img,c_list):
@@ -206,7 +206,7 @@ LBP对噪声敏感,LTP对光照敏感,SILTP是二者的改进版
 def SILTP(img,R,tau):
     if len(img.shape)>2: # 在这里img如果是彩图就应该是3维张量,如果是2维张量就是灰度图
         img=np.array(img,dtype=np.uint8)
-        #print(1111111111)
+        print(1111111111)
         #print(img.shape)    
         img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
@@ -266,10 +266,10 @@ def averagePooling(img):
     return img_pool
 
 def LOMO(img,c_list=[5,20],low_clip=0.1,high_clip=0.9,
-         R_list=[3,5],tau=0.3,hsv_bin_size=8,blocksize=32,block_step=16):
+         R_list=[3,5],tau=0.3,hsv_bin_size=8,blocksize=8,block_step=4):
         
     ss,xx,yy,zz=img.shape
-    #print('the data is {0}*{1}*{2}*{3}'.format(ss,xx,yy,zz))
+    print('the data is {0}*{1}*{2}*{3}'.format(ss,xx,yy,zz))
     img_cp=np.zeros((yy,zz,xx))
     for i in range(xx):
         img_cp[:,:,i]=img[0,i,:,:]
@@ -280,17 +280,17 @@ def LOMO(img,c_list=[5,20],low_clip=0.1,high_clip=0.9,
     
     img_cp=inverse_nomalize(img_cp,mean,variance)
     img=img_cp
-    #print(img) 
-    #print(img_cp.shape)
+    print(img) 
+    print(img_cp.shape)
     img_retinex=Retinex_MSRCP(img_cp,c_list,low_clip,high_clip)
-    #print('===================================================')
-    #print(img_retinex.shape)
+    print('===================================================')
+    print(img_retinex.shape)
     siltp_feat=np.array([])
     hsv_feat=np.array([])
     #for pool in range(3):
     row_num=int((img_cp.shape[0]-(blocksize-block_step))/block_step)
     col_num=int((img_cp.shape[1]-(blocksize-block_step))/block_step)
-    #liangzia=0
+    liangzia=0
     for row in range(row_num):
         for col in range(col_num):
             img_block=img_cp[
@@ -312,10 +312,10 @@ def LOMO(img,c_list=[5,20],low_clip=0.1,high_clip=0.9,
                 col * block_step:col * block_step + blocksize
                 ]
             img_block_copy=np.array(img_block2,dtype=np.uint8)
-            #print(img_block_copy.shape)
+            print(img_block_copy.shape)
             img_hsv=cv2.cvtColor(img_block_copy,cv2.COLOR_BGR2HSV)
-            #print('--------------------------------------{}'.format(liangzia))
-            #liangzia+=1
+            print('--------------------------------------{}'.format(liangzia))
+            liangzia+=1
                 #print(img_hsv.shape)
             hsv_hist=jointHistogram(
                 img_hsv,
@@ -345,16 +345,7 @@ def LOMO(img,c_list=[5,20],low_clip=0.1,high_clip=0.9,
     hsv_feat/=np.linalg.norm(hsv_feat)
 
     lomo=np.concatenate([siltp_feat,hsv_feat],0)
-    '''
     print(lomo)
-    liangzi,=lomo.shape
-    papri=0
-    for i in range(liangzi):
-        if lomo[i]==0.0:
-            papri+=1
-    print(papri)
-    '''
-
     return lomo
 
 

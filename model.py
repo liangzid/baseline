@@ -4,9 +4,8 @@ from torch.nn import init
 from torchvision import models
 from torch.autograd import Variable
 import numpy as np
-import PCA
 import LOMO
-
+import decent_dim
 
 ######################################################################
 def weights_init_kaiming(m):
@@ -209,15 +208,15 @@ class fusion_net(nn.Module):
         model_ft.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.model = model_ft
         #2048+4096=6144
-        self.classifier = ClassBlock(4096, class_num)
-        self.buffer1=nn.Linear(4096,4096,bias=1)
+        self.classifier = ClassBlock(4070, class_num)
+        #self.buffer1=nn.Linear(4096,4096,bias=1)
 
 
 
     def forward(self, x):
 
         #传统特征
-        hand_feature = PCA.sp_PCA(LOMO.LOMO(x),dAfter=2048)
+        hand_feature = decent_dim.dd(LOMO.LOMO(x.cpu().numpy()),dAfter=2022)
         #深度特征
         x = self.model.conv1(x)
         x = self.model.bn1(x)
@@ -229,31 +228,17 @@ class fusion_net(nn.Module):
         x = self.model.layer4(x)
         x = self.model.avgpool(x)
         x = torch.squeeze(x)
+        #print('***************************************************************')
+        #print(x.shape)
+        #print(type(x))
         #融合
-        x=[x,hand_feature]
+        #print(hand_feature.shape) 
+        x=torch.cat((x,hand_feature),1)
         x=torch.squeeze(x)
-
+        #print(x.shape)
+        #x=x.reshape(1,-1)
         x = self.classifier(x)
         return x
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # debug model structure
 #net = ft_net(751)

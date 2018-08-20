@@ -183,6 +183,15 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 # get the inputs
                 inputs, labels = data
                 #print(inputs.shape)
+                #2018,8,20,这几行是临时起意加上去的
+                #nowbatchsize,c,h,w=inputs.shape
+                #if nowbatchsize<opt.batchsize:
+                #    continue		
+
+
+
+
+
 
                 #下面的几行不知道pytorch 0.4.0还是否支持
                 # wrap them in Variable
@@ -194,6 +203,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
+                #print(inputs)
 
                 # forward
                 outputs = model(inputs)

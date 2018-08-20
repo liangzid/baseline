@@ -1,0 +1,12 @@
+{
+ "gpu_ids": "1,2,3",
+ "name": "FNN",
+ "data_dir": "/home/liangzi/Market1501/pytorch",
+ "train_all": false,
+ "color_jitter": false,
+ "batchsize": 2,
+ "erasing_p": 0,
+ "use_dense": false,
+ "PCB": false,
+ "FNN": true
+}
