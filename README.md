@@ -7,6 +7,6 @@ this edition has some explanatory notes, and may be changed or be added somethin
 
 使用此命令调用FNN函数：
 ```commandline
-python3 train.py --FNN
+ python3 train.py --gpu_ids 1,2,3 --FNN --name FNN --batchsize 2
 ```
 其他不变

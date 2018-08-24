@@ -4,28 +4,27 @@ from torch.nn import init
 from torchvision import models
 from torch.autograd import Variable
 import numpy as np
-import PCA
 import LOMO
-
+import decent_dim
 
 ######################################################################
 def weights_init_kaiming(m):
     classname = m.__class__.__name__
     # print(classname)
     if classname.find('Conv') != -1:
-        init.kaiming_normal(m.weight.data, a=0, mode='fan_in')
+        init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
     elif classname.find('Linear') != -1:
-        init.kaiming_normal(m.weight.data, a=0, mode='fan_out')
-        init.constant(m.bias.data, 0.0)
+        init.kaiming_normal_(m.weight.data, a=0, mode='fan_out')
+        init.constant_(m.bias.data, 0.0)
     elif classname.find('BatchNorm1d') != -1:
-        init.normal(m.weight.data, 1.0, 0.02)
-        init.constant(m.bias.data, 0.0)
+        init.normal_(m.weight.data, 1.0, 0.02)
+        init.constant_(m.bias.data, 0.0)
 
 def weights_init_classifier(m):
     classname = m.__class__.__name__
     if classname.find('Linear') != -1:
-        init.normal(m.weight.data, std=0.001)
-        init.constant(m.bias.data, 0.0)
+        init.normal_(m.weight.data, std=0.001)
+        init.constant_(m.bias.data, 0.0)
 
 # Defines the new fc layer and classification layer
 # |--Linear--|--bn--|--relu--|--Linear--|
@@ -209,15 +208,18 @@ class fusion_net(nn.Module):
         model_ft.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.model = model_ft
         #2048+4096=6144
-        self.classifier = ClassBlock(4096, class_num)
-        self.buffer1=nn.Linear(4096,4096,bias=1)
-
-
+        self.classifier = ClassBlock(4070, class_num)
+        #self.buffer1=nn.Linear(4096,4096,bias=1)
+        #hand_feature=np.ones((2,2022))
+        #self.hand_feature=Variable(torch.from_numpy(hand_feature).cuda().float(),requires_grad=True)
+        self.liangzi=0
+        
+        
 
     def forward(self, x):
 
         #传统特征
-        hand_feature = PCA.sp_PCA(LOMO.LOMO(x),dAfter=2048)
+        hand_feature = decent_dim.dd(LOMO.LOMO(x.cpu().numpy()),dAfter=2022)
         #深度特征
         x = self.model.conv1(x)
         x = self.model.bn1(x)
@@ -228,32 +230,20 @@ class fusion_net(nn.Module):
         x = self.model.layer3(x)
         x = self.model.layer4(x)
         x = self.model.avgpool(x)
-        x = torch.squeeze(x)
+        #x = torch.squeeze(x)
+        x=x.reshape(2,-1)
+        #print('***************************************************************{}'.format(self.liangzi))
+        #self.liangzi+=1
+        #print(x.shape)
+        #print(type(x))
         #融合
-        x=[x,hand_feature]
+        #print(hand_feature.shape) 
+        x=torch.cat((x,hand_feature),1)
         x=torch.squeeze(x)
-
+        #print(x.shape)
+        #x=x.reshape(1,-1)
         x = self.classifier(x)
         return x
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # debug model structure
 #net = ft_net(751)
