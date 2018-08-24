@@ -1,6 +1,9 @@
 import numpy as np
 import torch as t
+<<<<<<< HEAD
 from torch.autograd import Variable
+=======
+>>>>>>> cfa8d3b0456de987f25a1411cdb245bc11db8de5
 '''
 用来进行降维，利用均值和方差来代表一组数据，从而将整体的特征数据降维表出
 
@@ -25,7 +28,10 @@ def dd(x,dAfter):
             
         result=np.concatenate((dd1,dd2))
         resultt=t.from_numpy(result).type(t.cuda.FloatTensor)    
+<<<<<<< HEAD
         resultt=Variable(resultt,requires_grad=False)
+=======
+>>>>>>> cfa8d3b0456de987f25a1411cdb245bc11db8de5
         resultt=resultt.reshape(2,-1)
         
         return resultt

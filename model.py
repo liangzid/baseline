@@ -210,11 +210,16 @@ class fusion_net(nn.Module):
         #2048+4096=6144
         self.classifier = ClassBlock(4070, class_num)
         #self.buffer1=nn.Linear(4096,4096,bias=1)
+<<<<<<< HEAD
         #hand_feature=np.ones((2,2022))
         #self.hand_feature=Variable(torch.from_numpy(hand_feature).cuda().float(),requires_grad=True)
         self.liangzi=0
         
         
+=======
+
+
+>>>>>>> cfa8d3b0456de987f25a1411cdb245bc11db8de5
 
     def forward(self, x):
 
@@ -230,10 +235,15 @@ class fusion_net(nn.Module):
         x = self.model.layer3(x)
         x = self.model.layer4(x)
         x = self.model.avgpool(x)
+<<<<<<< HEAD
         #x = torch.squeeze(x)
         x=x.reshape(2,-1)
         #print('***************************************************************{}'.format(self.liangzi))
         #self.liangzi+=1
+=======
+        x = torch.squeeze(x)
+        #print('***************************************************************')
+>>>>>>> cfa8d3b0456de987f25a1411cdb245bc11db8de5
         #print(x.shape)
         #print(type(x))
         #融合
